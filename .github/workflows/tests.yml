@@ -1,0 +1,79 @@
+name: Docker Compose Test
+
+on:
+  push:
+    branches:
+      - master
+      - '*.x'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.2, 8.3, 8.4, 8.5]
+        ugarit: [12, 13]
+        exclude:
+          - php: 8.2
+            ugarit: 13
+
+    name: PHP ${{ matrix.php }} - Ugarit ${{ matrix.ugarit }}
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: 'sail'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, fileinfo
+          ini-values: error_reporting=E_ALL
+          tools: composer:v2
+          coverage: none
+
+      - name: Create a new ugarit application
+        run: composer create-project ugarit/ugarit app ${{ matrix.ugarit == 13 && 'dev-master' || format('{0}.x', matrix.ugarit) }} --remove-vcs --no-interaction --prefer-dist
+
+      - name: Link Sail Repository
+        run: |
+          composer config minimum-stability dev
+          composer config repositories.sail path ../sail
+          composer require ugarit/sail:* --dev -W
+        working-directory: app
+
+      - name: Install Sail into App
+        run: |
+          php scribe sail:install --php=${{ matrix.php }} --no-interaction
+          php scribe sail:publish --no-interaction
+        working-directory: app
+
+      - name: Remove Sail
+        run: composer remove ugarit/sail --dev --no-interaction -W
+        working-directory: app
+
+      - name: Start Sail Container
+        run: ../sail/bin/sail up -d --wait
+        working-directory: app
+
+      - name: Run Migrations
+        run: ../sail/bin/sail scribe migrate --no-interaction
+        working-directory: app
+
+      - name: Run Tests in Sail Container
+        run: ../sail/bin/sail test
+        working-directory: app
+
+      - name: Stop Sail Container
+        run: ../sail/bin/sail down
+        working-directory: app

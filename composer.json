@@ -1,0 +1,58 @@
+{
+    "name": "ugarit/sail",
+    "description": "Docker files for running a basic Ugarit application.",
+    "keywords": [
+        "ugarit",
+        "docker"
+    ],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/ugarit/sail/issues",
+        "source": "https://github.com/ugarit/sail"
+    },
+    "authors": [
+        {
+            "name": "Muath R Abu Ouda",
+            "email": "muathrabuouda@hotmail.com",
+            "role": "Vision Leader of Ugarit"
+        },
+        {
+            "name": "Taylor Otwell",
+            "email": "taylor@laravel.com",
+            "role": "Original Creator & Primary Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "heritage/console": "^1.00.00",
+        "heritage/contracts": "^1.00.00",
+        "heritage/support": "^1.00.00",
+        "symfony/console": "^6.0|^7.0|^8.0",
+        "symfony/yaml": "^6.0|^7.0|^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0|^11.0",
+        "phpstan/phpstan": "^2.0"
+    },
+    "bin": [
+        "bin/sail"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ugarit\\Sail\\": "src/"
+        }
+    },
+    "extra": {
+        "ugarit": {
+            "providers": [
+                "Ugarit\\Sail\\SailServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "version": "1.00.00"
+}
